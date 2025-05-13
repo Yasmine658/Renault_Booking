@@ -48,27 +48,27 @@ exports.signUp = async (req, res) => {
     }
   };
 
-exports.login = async (req, res) => {
-  const { username, password } = req.body;
-  try {
-    const user = await User.findOne({ username });
-    if (!user) return res.status(400).json({ message: "Cannot find user" });
-
-    if (await bcrypt.compare(password, user.password)) {
-      const accessToken = generateAccessToken({ id: user._id, name: username });
-      const refreshToken = jwt.sign(
-        { id: user._id, name: username },
-        process.env.REFRESH_TOKEN_SECRET
-      );
-      res.json({ accessToken, refreshToken });
-    } else {
-      res.status(403).json({ message: "Invalid credentials" });
+  exports.login = async (req, res) => {
+    const { email, password } = req.body;
+    try {
+      const user = await User.findOne({ email });
+      if (!user) return res.status(400).json({ message: "Cannot find user" });
+  
+      if (await bcrypt.compare(password, user.password)) {
+        const accessToken = generateAccessToken({ id: user._id, name: user.username });
+        const refreshToken = jwt.sign(
+          { id: user._id, name: user.username },
+          process.env.REFRESH_TOKEN_SECRET
+        );
+        res.json({ accessToken, refreshToken });
+      } else {
+        res.status(403).json({ message: "Invalid credentials" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: "Error logging in" });
     }
-  } catch (error) {
-    res.status(500).json({ message: "Error logging in" });
-  }
-};
-
+  };
+  
 exports.token = (req, res) => {
   const refreshToken = req.body.token;
   if (!refreshToken) return res.sendStatus(401);

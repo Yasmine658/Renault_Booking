@@ -9,11 +9,22 @@ const adminRoutes = require("./routes/adminRoutes");
 const app = express();
 app.use(express.json());
 
+const allowedOrigins = ["http://localhost:5173", "http://localhost:3000"];
+
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
   })
 );
+
+
 
 const uri = process.env.MONGO_URI;
 mongoose
@@ -21,7 +32,6 @@ mongoose
   .then(() => console.log("Connected to DB"))
   .catch(console.error);
 
-//
 app.use("/auth", authRoutes);
 app.use("/user", userRoutes);
 app.use("/admin", adminRoutes);

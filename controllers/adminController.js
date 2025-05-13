@@ -58,7 +58,7 @@ const getAllUsers = async (req, res) => {
   }
 };
 
-const getAllRDV = async (req, res) => {
+const getAllRDVs = async (req, res) => {
   try {
     const rdvs = await Rdv.find().populate({
       path: "carId",
@@ -79,7 +79,7 @@ const changeRDVStatus = async (req, res) => {
   const { userId, carId, rdvId } = req.params;
   const { status } = req.body;
 
-  if (!["pending", "done", "cancelled"].includes(status)) {
+  if (!["en attente", "terminé", "annulé"].includes(status)) {
     return res.status(400).json({ message: "Invalid status value." });
   }
 
@@ -106,9 +106,31 @@ const changeRDVStatus = async (req, res) => {
   }
 };
 
+const changeGuestRDVStatus = async (req, res) => {
+  const { carId, rdvId } = req.params;
+  const { status } = req.body;
+  if (!["en attente", "annulé", "terminé"].includes(status)) {
+    return res.status(400).json({ message: "Invalid status value." });
+  }
+  try {
+    const rdv = await Rdv.findOneAndUpdate(
+      { _id: rdvId, carId },
+      { status },
+      { new: true }
+    );
+    
+    if (!rdv) {
+      return res.status(404).json({ message: "RDV not found" });
+    }
+    res.status(200).json({ message: "RDV status updated successfully", rdv });
+  } catch (err) {
+    res.status(500).json({ message: "Error updating RDV", error: err });
+  }
+};
 module.exports = {
   createUser,
   getAllUsers,
-  getAllRDV,
+  getAllRDVs,
   changeRDVStatus,
+  changeGuestRDVStatus,
 };

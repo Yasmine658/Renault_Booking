@@ -8,8 +8,8 @@ const rdvSchema = new mongoose.Schema(
     service: { type: String, required: true },
     status: {
       type: String,
-      enum: ["pending", "done", "cancelled"],
-      default: "pending",
+      enum: ["en attente", "terminé", "annulé"],
+      default: "en attente",
     },
   },
   { timestamps: true }
